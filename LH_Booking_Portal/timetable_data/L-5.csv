@@ -1,0 +1,27 @@
+﻿Time Slot,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday
+08:00-08:30,Eng,Physics,-,Chem,Bio,-,-
+08:30-09:00,-,Math,CS,-,-,Chem,-
+09:00-09:30,Physics,-,-,Bio,Math,-,-
+09:30-10:00,CS,Chem,-,-,Eng,-,-
+10:00-10:30,-,-,Bio,-,-,Physics,-
+10:30-11:00,Math,Eng,-,CS,-,-,-
+11:00-11:30,-,Physics,-,Math,-,Chem,-
+11:30-12:00,Bio,-,-,Eng,-,-,-
+12:00-12:30,-,CS,Physics,-,Math,-,-
+12:30-13:00,-,-,-,-,-,-,-
+13:00-13:30,Chem,-,-,Bio,Eng,-,-
+13:30-14:00,-,Math,-,-,CS,-,-
+14:00-14:30,-,-,Physics,-,-,Eng,-
+14:30-15:00,Bio,-,-,Chem,-,-,-
+15:00-15:30,-,-,Math,-,-,CS,-
+15:30-16:00,-,Eng,-,Physics,-,-,-
+16:00-16:30,CS,-,-,Math,-,-,-
+16:30-17:00,-,Chem,Bio,-,-,-,-
+17:00-17:30,-,Physics,-,CS,-,Eng,-
+17:30-18:00,Math,-,-,-,Bio,-,-
+18:00-18:30,-,-,Chem,-,-,-,-
+18:30-19:00,-,Eng,-,Physics,-,Bio,-
+19:00-19:30,CS,-,-,-,Math,-,-
+19:30-20:00,-,-,-,-,-,-,-
+20:00-20:30,-,Chem,-,-,Eng,-,-
+20:30-21:00,Math,-,-,Bio,-,-,-

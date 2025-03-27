@@ -1,20 +1,9 @@
 import React from "react";
-import { NavLink, useNavigate } from "react-router-dom";
-import { logoutUser } from "../../api";
+import { NavLink } from "react-router-dom";
 import "./UserNavbar.css";
 
 const UserNavbar = () => {
   const role = localStorage.getItem("role"); // Get user role
-  const navigate = useNavigate(); // Hook for redirection
-
-  const handleLogout = async () => {
-    try {
-      await logoutUser(); // Logout user
-      navigate("/login"); // Redirect to login page
-    } catch (error) {
-      console.error("Logout failed:", error);
-    }
-  };
 
   const navItems = [
     { name: "New Booking", path: "/booking-form", allowedRoles: ["student", "faculty", "admin"] },
@@ -22,6 +11,7 @@ const UserNavbar = () => {
     { name: "History", path: "/history", allowedRoles: ["student", "faculty"] },
     { name: "Pending Approvals", path: "/pending-approvals", allowedRoles: ["student", "faculty"] }, // Only admin can access
     { name: "Register User", path: "/register", allowedRoles: ["admin"] }, // Only admin can register users
+    { name: "Search Bookings", path: "/search", allowedRoles: ["admin"] }, // Only admin can register users
   ];
 
   return (
@@ -41,10 +31,6 @@ const UserNavbar = () => {
           </NavLink>
         );
       })}
-
-      <button className="nav-item logout-btn" onClick={handleLogout}>
-        Logout
-      </button>
     </div>
   );
 };

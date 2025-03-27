@@ -10,7 +10,7 @@ import BookingForm from "./components/Booking/BookingForm";
 // import LectureHallTimetable from './components/Timetable/LectureHallTimetable';
 import PendingList from "./components/Booking/PendingList";
 import BookingHistoryList from "./components/Booking/BookingHistory";
-import LectureHallBookings from "./components/Timetable/DeleteBooking";
+import Bookings from "./components/Timetable/SearchBooking";
 
 
 const App = () => {
@@ -28,7 +28,7 @@ const App = () => {
                 <Route path="/lecture-halls" element={<LectureHalls />} />
                 <Route path="/history" element={<BookingHistoryList />} />
                 <Route path="/booking-form" element={<BookingForm />} />
-                {/* <Route path="/delete" element={<LectureHallBookings />} /> */}
+                <Route path="/search" element={<Bookings />} />
                 <Route path="/" element={<LectureHalls />} />
                 {/* <Route path="/timetable/:hallId" element={<LectureHallTimetable />} /> */}
                 <Route path="/pending-approvals" element={<PendingList />} /> 

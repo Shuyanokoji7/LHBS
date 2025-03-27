@@ -2,10 +2,13 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.views import APIView
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
+from django.utils.timezone import now
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.generics import ListAPIView, DestroyAPIView
 from user.api.permissions import IsAdmin, IsFaculty, IsStudent 
 from django.core.mail import send_mail
+from django.db.models import Q
 from rest_framework.permissions import AllowAny
 from django.shortcuts import get_object_or_404
 from timetable.models import FixedLecture, TimeSlot, LectureHall
@@ -27,6 +30,7 @@ from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
 from io import BytesIO
+
 
 
 @api_view(['GET'])
@@ -458,3 +462,21 @@ class GenerateBillAPIView(APIView):
         print("PDF Elements:", elements)
         buffer.seek(0)
         return FileResponse(buffer, as_attachment=True, filename=f"LHC_Bill_{booking_id}.pdf")
+
+
+class SearchBookingAPIView(ListAPIView):
+    serializer_class = BookingSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        queryset = Booking.objects.filter(date__gte=now().date())  # Future bookings only
+
+        lecture_hall = self.request.query_params.get("lecture_hall")
+        user = self.request.query_params.get("user")
+
+        if lecture_hall:
+            queryset = queryset.filter(lecture_hall_id=lecture_hall)
+        if user:
+            queryset = queryset.filter(user_id=user)
+
+        return queryset

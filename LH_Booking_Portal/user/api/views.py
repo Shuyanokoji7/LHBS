@@ -1,5 +1,6 @@
 from rest_framework import generics, status
 from rest_framework.response import Response
+from rest_framework.generics import ListAPIView
 from rest_framework.permissions import AllowAny
 from rest_framework.permissions import IsAuthenticated
 from user.api.permissions import IsAdmin, IsFaculty, IsStudent 
@@ -29,7 +30,20 @@ class RegisterView(generics.CreateAPIView):
             {"message": "User registered successfully, email sent.", "user": serializer.data},
             status=status.HTTP_201_CREATED
         )
+
+class GetUserView(ListAPIView):
+    queryset = User.objects.all()  
+    serializer_class = UserSerializer  
+    permission_classes = [IsAdmin]  
     
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        username = self.request.query_params.get("username", None)
+        if username:
+            queryset = queryset.filter(username__icontains=username)
+        return queryset
+
+
 class LoginView(APIView):
 
     permission_classes = [AllowAny]

@@ -1,25 +1,19 @@
 import React from 'react';
 import './Header.css';
 import iitk_logo from '../User/lh_booking_images/iitk_logo.jpg';
-import axios from 'axios'; // Make sure axios is imported
+import {logoutUser} from "../../api"
+import { useNavigate } from "react-router-dom";
+
 
 const Header = () => {
   // Logout function
+  const navigate = useNavigate(); // Hook for redirection
   const handleLogout = async () => {
     try {
-      const token = localStorage.getItem("token");
-      if (token) {
-        await axios.post(`http://127.0.0.1:8000/api/user/logout/`, {}, {
-          headers: { Authorization: `Token ${token}` },
-        });
-        localStorage.removeItem("token"); // Remove token after successful logout
-        // Redirect to login page after logout
-        window.location.href = '/login';
-      } else {
-        console.error('No token found in localStorage');
-      }
+      await logoutUser(); // Logout user
+      navigate("/login"); // Redirect to login page
     } catch (error) {
-      console.error('Error during logout', error.response?.data || error.message);
+      console.error("Logout failed:", error);
     }
   };
 

@@ -86,13 +86,12 @@ export const resetPassword = async (userId, token, password) => {
 export const logoutUser = async () => {
     try {
         const token = localStorage.getItem("token");
-        if (!token) return; // ✅ Prevents request if token is missing
+        if (!token) return; 
 
         await axiosInstance.post(`/user/logout/`, {}, {
-            headers: { Authorization: `Bearer ${token}` }, // ✅ Use Bearer token
+            headers: { Authorization: `Bearer ${token}` }, 
         });
 
-        // ✅ Clear all user-related data
         localStorage.removeItem("token");
         localStorage.removeItem("userID");
         localStorage.removeItem("role");
@@ -114,6 +113,17 @@ export const fetchLectureHalls = async () => {
         throw error;
     }
 };
+
+export const fetchUsers = async () => {
+    try {
+        const response = await axiosInstance.get(`http://127.0.0.1:8000/api/user/getusers/`);
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching lecture halls:", error);
+        throw error;
+    }
+};
+
 
 export const fetchTimetable = async (hallId, date = null) => {
     try {
@@ -176,6 +186,28 @@ export const submitBooking = async (bookingData) => {
     }
 };
 
+export const searchBookings = async (lectureHall = "", user = "") => {
+    try {
+        const response = await axiosInstance.get(`/bookings/search/`, {
+            params: { lecture_hall: lectureHall, user: user },
+        });
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching future bookings:", error);
+        throw error;
+    }
+};
+
+export const deleteBooking = async (bookingId) => {
+    try {
+        await axiosInstance.delete(`/bookings/delete/${bookingId}/`);
+        return { success: true };
+    } catch (error) {
+        console.error("Error deleting booking:", error.response?.data || error.message);
+        throw error;
+    }
+};
+
 export const fetchBookingHistory = async () => {
     const userId = localStorage.getItem("userID");
 
@@ -192,7 +224,7 @@ export const fetchBookingHistory = async () => {
 
 export const downloadBill = async (bookingId) => {
     try {
-        const response = await axiosInstance.get(`/api/generate-bill/${bookingId}/`, {
+        const response = await axiosInstance.get(`/bookings/generate-bill/${bookingId}/`, {
             responseType: "blob", // Ensures we receive binary data
         });
 
