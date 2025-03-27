@@ -20,14 +20,14 @@ const PendingList = () => {
         };
 
         fetchPendingBookings();
-    }, []); 
+    }, []);
     if (error) return <p style={{ color: "red" }}>{error}</p>;
     if (!bookings.length) return <p>No pending bookings.</p>;
 
     return (
         <div>
-            <UserNavbar/>
-            <Header/>
+            <UserNavbar />
+            <Header />
             <h2>Your Pending Bookings</h2>
             <table border="1">
                 <thead>
@@ -51,7 +51,7 @@ const PendingList = () => {
                             <td>{booking.lecture_hall_name}</td>
                             <td>{booking.date}</td>
                             <td>
-                                {booking.time_slots.map((slot, index) => (
+                                {booking.time_slots_details.map((slot, index) => (
                                     <div key={`${booking.id}-slot-${index}`}>
                                         {slot.start_time} - {slot.end_time}
                                     </div>

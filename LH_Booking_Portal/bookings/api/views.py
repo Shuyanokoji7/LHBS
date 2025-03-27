@@ -44,10 +44,10 @@ def get_pricing(request):
         hall = LectureHall.objects.get(id=lecture_hall_id)
         return Response({
             "capacity": hall.capacity,
-            "ac_price": float(hall.ac_price),
-            "non_ac_price": float(hall.non_ac_price),
-            "projector_price": float(hall.projector_price),
-            "extra_charge": round(float(hall.ac_price) * 0.35, 2)
+            "ac_price": int(hall.ac_price),
+            "non_ac_price": int(hall.non_ac_price),
+            "projector_price": int(hall.projector_price),
+            "extra_charge": round(int(hall.ac_price) * 0.35, 2)
         })
     except LectureHall.DoesNotExist:
         return Response({"error": "Lecture hall not found"}, status=status.HTTP_404_NOT_FOUND)
@@ -82,7 +82,7 @@ def send_approval_email(authority_email, booking):
             f"AC Required: {'Yes' if booking.ac_required else 'No'}\n"
             f"Projector Required: {'Yes' if booking.projector_required else 'No'}\n"
             f"Purpose: {booking.purpose}\n\n"
-            f"Estimated Price: {booking.price} INR\n\n"
+            f"Estimated Price: {int(booking.price)} INR\n\n"
             f"✅ Approve: {approval_link}\n"
             f"❌ Reject: {rejection_link}"
         ),
@@ -259,44 +259,40 @@ class AvailableSlotsAPIView(APIView):
         return Response({"available_slots": list(available_slots)}, status=status.HTTP_200_OK)
     
 
+from django.http import HttpResponse
+
 class ApproveBookingAPIView(APIView):
     permission_classes = [AllowAny]  
 
     def get(self, request):
         global_token = request.GET.get("global_token")
         authority_token = request.GET.get("authority_token")
-        
+
         if not global_token or not authority_token:
-            return Response({"error": "Invalid or missing approval token."}, status=status.HTTP_400_BAD_REQUEST)
+            return HttpResponse("❌ Invalid or missing approval token.", status=400)
 
         booking = get_object_or_404(Booking, approval_token=global_token)
 
-        # Find the first unapproved authority
         authority_email = next(
             (email for email, token in booking.approval_tokens.items() if token == authority_token),
             None
         )
 
-        if not authority_email:
-            return Response({"message": "Booking has already been approved."}, status=status.HTTP_200_OK)
-
-        if booking.status in ["Approved", "Rejected"]:
-            return Response({"Booking is already {booking.status}. No further action needed."}, status=status.HTTP_400_BAD_REQUEST)
+        if not authority_email or booking.status in ["Approved", "Rejected"]:
+            return HttpResponse(f"⚠️ Booking is already {booking.status}. No further action needed.", status=400)
 
         if booking.approvals_pending.get(authority_email, False):
-            return Response({"error" : "You have already approved this booking."}, status=status.HTTP_400_BAD_REQUEST)
-        
-        # Mark the current approver as approved
-        booking.approvals_pending[authority_email] = True
-        # booking.save(update_fields=["approvals_pending"])
+            return HttpResponse("✅ You have already approved this booking.", status=400)
 
-        # Check if all approvals are done
+        # Mark the approval
+        booking.approvals_pending[authority_email] = True
+        booking.save()
+
         if all(booking.approvals_pending.values()):
             booking.status = "Approved"
             booking.decision_time = timezone.now()
             booking.save()
 
-            # Send confirmation email to user
             send_mail(
                 subject="Booking Approved ✅",
                 message=f"Your booking for {booking.lecture_hall.name} on {booking.date} "
@@ -304,20 +300,14 @@ class ApproveBookingAPIView(APIView):
                 from_email="noreply@lhcportal.com",
                 recipient_list=[booking.user.email],
             )
-            return Response({"message": "Booking fully approved!"}, status=status.HTTP_200_OK)
+            return HttpResponse("🎉 Booking fully approved!", status=200)
 
-        booking.save()
-
-        # Send approval request to the next approver
-        next_approver_email = next(
-            (email for email, approved in booking.approvals_pending.items() if not approved),
-            None
-        )
-
+        next_approver_email = next((email for email, approved in booking.approvals_pending.items() if not approved), None)
         if next_approver_email:
             send_approval_email(next_approver_email, booking)
-            
-        return Response({"message": "Approval recorded. Waiting for next authority."}, status=status.HTTP_200_OK)
+
+        return HttpResponse("✅ Approval recorded. Waiting for next authority.", status=200)
+
 
 class RejectBookingAPIView(APIView):
     permission_classes = [AllowAny]  
@@ -327,15 +317,16 @@ class RejectBookingAPIView(APIView):
         authority_token = request.GET.get("authority_token")
 
         if not global_token or not authority_token:
-            return Response({"error": "Invalid or missing rejection token."}, status=status.HTTP_400_BAD_REQUEST)
-        
-        if booking.status in ["Approved", "Rejected"]:
-            return Response({"message": "Booking is already {booking.status}. No further action needed."}, status=status.HTTP_400_BAD_REQUEST)
+            return HttpResponse("❌ Invalid or missing rejection token.", status=400)
 
         booking = get_object_or_404(Booking, approval_token=global_token)
+
+        if booking.status in ["Approved", "Rejected"]:
+            return HttpResponse(f"⚠️ Booking is already {booking.status}. No further action needed.", status=400)
+
         booking.status = "Rejected"
         booking.decision_time = timezone.now()
-        booking.approvals_pending = {}  
+        booking.approvals_pending = {}
         booking.save()
 
         send_mail(
@@ -345,7 +336,9 @@ class RejectBookingAPIView(APIView):
             from_email="noreply@lhcportal.com",
             recipient_list=[booking.user.email],
         )
-        return HttpResponse("Booking rejected successfully!")
+
+        return HttpResponse("❌ Booking rejected successfully!", status=200)
+
 
 class PendingApprovalsAPIView(APIView):
     permission_classes = [IsAuthenticated]  
