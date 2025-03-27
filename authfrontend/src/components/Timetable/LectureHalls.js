@@ -1,45 +1,9 @@
-// import React, { useEffect, useState } from "react";
-// import axios from "axios";
-// import { Link } from "react-router-dom";
-// import HNavbar from "../Basic/HorNavBar";
-
-// const LectureHalls = () => {
-//     const [lectureHalls, setLectureHalls] = useState([]);
-//     const [error, setError] = useState(null);
-
-//     useEffect(() => {
-//         axios.get("http://127.0.0.1:8000/api/timetable/lecture-halls/")
-//             .then((response) => setLectureHalls(response.data))
-//             .catch((err) => setError("Error fetching lecture halls"));
-//     }, []);
-
-//     return (
-//         <div>
-//             <HNavbar />
-//             <h1>Available Lecture Halls</h1>
-//             {error && <p style={{ color: "red" }}>{error}</p>}
-//             {lectureHalls.length > 0 ? (
-//                 <ul>
-//                     {lectureHalls.map((hall) => (
-//                         <li key={hall.id}>
-//                             <Link to={`/timetable/${hall.id}`}>{hall.name}</Link>
-//                         </li>
-//                     ))}
-//                 </ul>
-//             ) : (
-//                 <p>No lecture halls available.</p>
-//             )}
-//         </div>
-//     );
-// };
-
-// export default LectureHalls;
-
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import axios from "axios";
 import Header from "../Basic/Header";
 import UserNavbar from "../Basic/UserNavbar"
+import { fetchLectureHalls } from "../../api";
+import { fetchTimetable } from "../../api";
 
 const LectureHallTimetable = () => {
     const { hallId: paramHallId } = useParams();
@@ -50,22 +14,35 @@ const LectureHallTimetable = () => {
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        // Fetch available lecture halls
-        axios.get("http://127.0.0.1:8000/api/timetable/lecture-halls/")
-            .then((response) => setHalls(response.data))
-            .catch(() => setError("Error fetching lecture halls"));
+        const getLectureHalls = async () => {
+            try {
+                const data = await fetchLectureHalls();
+                setHalls(data);
+            } catch (error) {
+                console.error("Error fetching lecture halls:", error);
+                setError(error.error || "Failed to fetch lecture halls.");
+            }
+        };
+    
+        getLectureHalls();
     }, []);
 
     useEffect(() => {
-        if (!hallId || !selectedDate) return; // Fetch only when both are selected
-
-        axios.get(`http://127.0.0.1:8000/api/timetable/${hallId}/?date=${selectedDate}`)
-            .then((response) => {
-                setTimetable(response.data);
-                console.log("Timetable Data:", response.data);
-            })
-            .catch(() => setError("Error fetching timetable"));
-    }, [hallId, selectedDate]);
+        if (!hallId || !selectedDate) return; // Fetch only when both hallId and selectedDate are selected
+    
+        const getTimetable = async () => {
+            try {
+                const data = await fetchTimetable(hallId, selectedDate);
+                setTimetable(data);  
+                console.log("Timetable Data:", data);
+            } catch (error) {
+                console.error("Error fetching timetable:", error);
+                setError(error.error || "Failed to fetch timetable");  // Update the error state
+            }
+        };
+    
+        getTimetable();  // Fetch the timetable
+    }, [hallId, selectedDate]); 
 
     const timeSlots = timetable 
         ? Array.from(new Set(

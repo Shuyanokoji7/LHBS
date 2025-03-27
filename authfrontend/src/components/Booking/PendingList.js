@@ -1,50 +1,28 @@
 import React, { useEffect, useState } from "react";
 import Header from "../Basic/Header";
 import UserNavbar from "../Basic/UserNavbar"
+import { getPendingApprovals } from "../../api";
 
 const PendingList = () => {
     const [bookings, setBookings] = useState([]);
     const [error, setError] = useState(null);
 
-    // Fetch pending bookings from the API
     useEffect(() => {
         const fetchPendingBookings = async () => {
-            const token = localStorage.getItem("authToken");
-            const userId = localStorage.getItem("userId");
-
-            if (!token || !userId) {
-                alert("User not authenticated. Please log in.");
-                return;
-            }
-
             try {
-                const response = await fetch("http://127.0.0.1:8000/api/bookings/pending/", {
-                    method: "POST", // Change to POST
-                    headers: {
-                        "Authorization": `Bearer ${token}`,
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({ user: userId }), // Send user ID in body
-                });
-
-                if (!response.ok) {
-                    throw new Error(`Error: ${response.status}`);
-                }
-
-                const data = await response.json();
+                const data = await getPendingApprovals(); // Call API function
                 console.log("Pending Bookings:", data);
-
-                setBookings(data); // ✅ Update state with fetched data
+                setBookings(data);
             } catch (error) {
                 console.error("Failed to fetch pending bookings:", error);
-                setError("Failed to fetch pending bookings."); // ✅ Update error state
+                setError(error.error || "Failed to fetch pending bookings.");
             }
         };
-        fetchPendingBookings();
-    }, []);
 
+        fetchPendingBookings();
+    }, []); 
     if (error) return <p style={{ color: "red" }}>{error}</p>;
-    if (!bookings.length) return <p>You have no pending bookings.</p>;
+    if (!bookings.length) return <p>No pending bookings.</p>;
 
     return (
         <div>

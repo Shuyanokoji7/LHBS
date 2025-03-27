@@ -5,9 +5,14 @@
   padding: 16px;
   height: 100vh;
   position: fixed; /* Fixes the navbar on the left side of the screen */
-  top: 60px; /* Adjust this value based on your header height */
+  top: 300px; /* Adjust this value based on your header height */
   left: 0; /* Aligns the navbar to the left */
   z-index: 1000; /* Ensures the navbar stays above other content */
+}
+.disabled {
+  pointer-events: none; /* Prevents clicking */
+  opacity: 0.5; /* Grayed-out effect */
+  cursor: not-allowed;
 }
 .nav-item {
   width: 100%; /* Keeps the button width 100% of the navbar width */

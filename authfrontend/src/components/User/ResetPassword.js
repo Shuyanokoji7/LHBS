@@ -3,7 +3,6 @@ import { useParams, useNavigate } from "react-router-dom";
 import { resetPassword } from "../../api";
 import iitkLogo from "./lh_booking_images/iitk_logo.jpg";
 import libraryImage from "./lh_booking_images/newcanvalib.png";
-// import "./login.css";
 
 const ResetPassword = () => {
     const { userId, token } = useParams();

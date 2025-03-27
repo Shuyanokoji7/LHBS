@@ -1,16 +1,34 @@
 import axios from "axios";
 
+// Create an Axios instance
+const axiosInstance = axios.create({
+    baseURL: "http://127.0.0.1:8000/api",  // Set your base API URL
+});
+
+// Add a request interceptor to include the token only if it exists
+axiosInstance.interceptors.request.use(
+    (config) => {
+        const token = localStorage.getItem("token");
+        console.log("Using Token:", token);  // Debugging
+        if (token) {
+            config.headers.Authorization = `Token ${token}`;
+        }
+        console.log("Axios Request Headers:", config.headers);  // Debugging
+        return config;
+    },
+    (error) => Promise.reject(error)
+);
+
+export default axiosInstance;
 // Register User
 export const registerUser = async (userData) => {
     console.log("Sending user data:", userData);
     try {
-        const response = await axios.post(`http://127.0.0.1:8000/api/user/register/`, userData, {
-            headers: { "Content-Type": "application/json" },
-        });
+        const response = await axiosInstance.post(`/user/register/`, userData);
         console.log("API Response:", response);
         return response.data;
     } catch (err) {
-        console.log("Registration Error:", err.response?.data || err.message);
+        console.error("Registration Error:", err.response?.data || err.message);
         throw err.response?.data || { error: "Registration failed. Please try again." };
     }
 };
@@ -20,11 +38,13 @@ export const loginUser = async (loginData) => {
     console.log("Sending login request with data:", JSON.stringify(loginData)); // Debugging
 
     try {
-        const response = await axios.post(`http://127.0.0.1:8000/api/user/login/`, loginData, {
+        const response = await axiosInstance.post(`http://127.0.0.1:8000/api/user/login/`, loginData, {
             headers: { "Content-Type": "application/json" },
         });
-        console.log("API Response:", response.data);
-        localStorage.setItem("token", response.data.token);
+        console.log("API Response:", response.data.role);
+        localStorage.setItem("token", response.data.token);        
+        localStorage.setItem("userID", response.data.user_id);        
+        localStorage.setItem("role", response.data.role);
         return response.data;
     } catch (error) {
         console.error("Login Error:", error.response?.data || error.message);
@@ -37,7 +57,7 @@ export const loginUser = async (loginData) => {
 export const requestPasswordReset = async (email) => {
     console.log("Sending password reset request:", email);
     try {
-        const response = await axios.post(`http://127.0.0.1:8000/api/user/password-reset/`, { email });
+        const response = await axiosInstance.post(`http://127.0.0.1:8000/api/user/password-reset/`, { email });
         console.log("Reset response:", response.data);
         return response.data;
     } catch (error) {
@@ -50,7 +70,7 @@ export const requestPasswordReset = async (email) => {
 export const resetPassword = async (userId, token, password) => {
     console.log("Sending password reset confirmation:", userId, token, password);
     try {
-        const response = await axios.post(
+        const response = await axiosInstance.post(
             `http://127.0.0.1:8000/api/user/password-reset-confirm/${userId}/${token}/`,
             { password },
             { headers: { "Content-Type": "application/json" } }  // Ensure correct headers
@@ -66,18 +86,28 @@ export const resetPassword = async (userId, token, password) => {
 export const logoutUser = async () => {
     try {
         const token = localStorage.getItem("token");
-        await axios.post(`http://127.0.0.1:8000/api/user/logout/`, {}, {
-            headers: { Authorization: `Token ${token}` },
+        if (!token) return; // ✅ Prevents request if token is missing
+
+        await axiosInstance.post(`/user/logout/`, {}, {
+            headers: { Authorization: `Bearer ${token}` }, // ✅ Use Bearer token
         });
-        localStorage.removeItem("token"); // Remove token
+
+        // ✅ Clear all user-related data
+        localStorage.removeItem("token");
+        localStorage.removeItem("userID");
+        localStorage.removeItem("role");
+
+        console.log("User logged out successfully.");
     } catch (error) {
-        throw error.response.data;
+        console.error("Logout error:", error.response?.data || error.message);
+        throw error.response?.data || { error: "Logout failed. Please try again." };
     }
 };
 
+
 export const fetchLectureHalls = async () => {
     try {
-        const response = await axios.get(`http://127.0.0.1:8000/api/timetable/lecture-halls/`);
+        const response = await axiosInstance.get(`http://127.0.0.1:8000/api/timetable/lecture-halls/`);
         return response.data;
     } catch (error) {
         console.error("Error fetching lecture halls:", error);
@@ -88,7 +118,7 @@ export const fetchLectureHalls = async () => {
 export const fetchTimetable = async (hallId, date = null) => {
     try {
         const params = date ? { params: { date } } : {}; // Optional date filter
-        const response = await axios.get(`http://127.0.0.1:8000/api/timetable/timetable/${hallId}/`, params);
+        const response = await axiosInstance.get(`http://127.0.0.1:8000/api/timetable/${hallId}/`, params);
         return response.data;
     } catch (error) {
         console.error("Error fetching timetable:", error);
@@ -97,62 +127,92 @@ export const fetchTimetable = async (hallId, date = null) => {
 };
 
 export const getPendingApprovals = async () => {
-    const response = await fetch(`http://127.0.0.1:8000/api/bookings/pending/`);
-    if (!response.ok) throw new Error("Failed to fetch pending approvals");
-    return response.json();
+    try {
+        const userId = localStorage.getItem("userID"); 
+
+        if (!userId) {
+            throw new Error("User ID not found in local storage");
+        }
+
+        const response = await axiosInstance.post(`/bookings/pending/`, { user: userId }); // Send user ID in request body
+
+        return response.data;
+
+    } catch (error) {
+        console.error("Error fetching pending approvals:", error.response?.data || error.message);
+        throw error.response?.data || { error: "Failed to fetch pending approvals" };
+    }
 };
+
 export const fetchAvailableSlots = async (lectureHallId, date) => {
     try {
         console.log(`Fetching slots for Hall ID: ${lectureHallId} on Date: ${date}`);
 
-        const response = await fetch(
-            `http://127.0.0.1:8000/api/bookings/available-slots/?lecture_hall=${lectureHallId}&date=${date}`
-        );
+        const response = await axiosInstance.get(`/bookings/available-slots/`, {
+            params: { lecture_hall: lectureHallId, date: date },
+        });
 
-        if (!response.ok) {
-            console.error("Error response from server:", response.status, response.statusText);
-            throw new Error("Failed to fetch available slots");
-        }
+        console.log("API Response:", response.data); // ✅ Debugging
 
-        const data = await response.json();
-        console.log("API Response:", data); // ✅ Debugging
-
-        return Array.isArray(data.available_slots) ? data.available_slots : []; // ✅ Ensure array format
+        return Array.isArray(response.data.available_slots) ? response.data.available_slots : [];
     } catch (error) {
-        console.error("Error fetching slots:", error);
+        console.error("Error fetching slots:", error.response?.data || error.message);
         return []; // ✅ Prevents UI crashes
     }
 };
 
 export const submitBooking = async (bookingData) => {
-    console.log(bookingData);
-    const token = localStorage.getItem("authToken");
-    if (!token) throw new Error("User not authenticated");
-
-    const response = await fetch(`http://127.0.0.1:8000/api/bookings/create/`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Token ${token}`
-        },
-        body: JSON.stringify(bookingData),
-    });
-
-    const textResponse = await response.text();  // Get raw response first
-    console.log("Raw Response:", textResponse);  // Log the response for debugging
-
     try {
-        const jsonResponse = JSON.parse(textResponse); // Try parsing JSON
-        if (!response.ok) {
-            throw new Error(jsonResponse.error || "Failed to submit booking");
-        }
-        return jsonResponse;
+        console.log("Submitting Booking Data:", bookingData);
+
+        const response = await axiosInstance.post(`/bookings/create/`, bookingData);
+
+        console.log("API Response:", response.data); // ✅ Debugging
+
+        return response.data;
     } catch (error) {
-        console.error("Invalid JSON response:", textResponse); // Log unexpected HTML response
-        throw new Error("An unexpected error occurred. Please check the server logs.");
+        console.error("Error submitting booking:", error.response?.data || error.message);
+        throw error.response?.data || { error: "Booking submission failed." };
     }
 };
 
+export const fetchBookingHistory = async () => {
+    const userId = localStorage.getItem("userID");
 
+    if (!userId) throw new Error("User ID not found. Please log in again.");
 
+    try {
+        const response = await axiosInstance.post(`/bookings/history/`, { user: userId });
+        return response.data;
+    } catch (error) {
+        console.error("Failed to fetch booking history:", error.response?.data || error.message);
+        throw error.response?.data || { error: "Could not fetch booking history." };
+    }
+};
 
+export const downloadBill = async (bookingId) => {
+    try {
+        const response = await axiosInstance.get(`/api/generate-bill/${bookingId}/`, {
+            responseType: "blob", // Ensures we receive binary data
+        });
+
+        if (!response || response.status !== 200) {
+            throw new Error("Failed to download bill");
+        }
+
+        return response.data; // Return the blob so it can be handled in the component
+    } catch (error) {
+        console.error("Error downloading bill:", error);
+        throw new Error("Failed to download bill. Please try again.");
+    }
+};
+
+export const addNewAuthority = async (authorityData) => {
+    try {
+        const response = await axiosInstance.post(`/user/createauthorities/`, authorityData);
+        return response.data;
+    } catch (error) {
+        console.error("Error adding authority:", error.response?.data || error.message);
+        throw error.response?.data || { error: "Failed to add authority." };
+    }
+};

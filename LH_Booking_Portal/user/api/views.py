@@ -1,7 +1,8 @@
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
-# from user.api.permissions import IsAdmin 
+from rest_framework.permissions import IsAuthenticated
+from user.api.permissions import IsAdmin, IsFaculty, IsStudent 
 from django.contrib.auth.tokens import default_token_generator
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import get_user_model
@@ -16,9 +17,10 @@ User = get_user_model()
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated, IsAdmin]
 
     def create(self, request, *args, **kwargs):
+        print(f"User: {request.user}, Role: {request.user.role}")
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
@@ -45,9 +47,10 @@ class LoginView(APIView):
         
         if user:
             token, _ = Token.objects.get_or_create(user=user)
-            return Response({"token": token.key, "user_id": user.id}, status=status.HTTP_200_OK)
+            return Response({"token": token.key, "user_id": user.id, "role": user.role}, status=status.HTTP_200_OK)
         else:
             return Response({"error": "Invalid credentials."}, status=status.HTTP_400_BAD_REQUEST)
+
 
 class PasswordResetRequestView(APIView):
     permission_classes = [AllowAny]  # ✅ This allows anyone to access this view
@@ -97,21 +100,23 @@ class PasswordResetConfirmView(APIView):
         
         return Response({"error": "Invalid or expired token"}, status=status.HTTP_400_BAD_REQUEST)
 
-
 class LogoutView(APIView):
+    permission_classes = [IsAuthenticated]
     def post(self, request):
-        request.auth.delete()
-        return Response({"message": "Successfully logged out"}, status=status.HTTP_200_OK)
+        if request.auth:
+            request.auth.delete()
+            return Response({"message": "Successfully logged out"}, status=status.HTTP_200_OK)
+        return Response({"error": "Invalid request or already logged out"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class AuthorityListView(generics.ListAPIView):
     
-    permission_classes = [AllowAny]
+    permission_classes = [IsAdmin]
     queryset = Authority.objects.all()
     serializer_class = AuthoritySerializer
 
 class CreateAuthorityView(generics.CreateAPIView):
 
-    permission_classes = [AllowAny]
+    permission_classes = [IsAdmin]
     queryset = Authority.objects.all()
     serializer_class = AuthoritySerializer

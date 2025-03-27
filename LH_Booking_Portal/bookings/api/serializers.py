@@ -11,7 +11,9 @@ class TimeSlotSerializer(serializers.ModelSerializer):
 
 class BookingSerializer(serializers.ModelSerializer):
     user = serializers.ReadOnlyField(source='user.username')  # Read-only user field
-    time_slots = TimeSlotSerializer(many=True, read_only=True)  # ✅ Nested serializer
+    time_slots = serializers.PrimaryKeyRelatedField(
+            queryset=TimeSlot.objects.all(), many=True
+        )
     lecture_hall_name = serializers.CharField(source="lecture_hall.name", read_only=True)
     lecture_hall = serializers.PrimaryKeyRelatedField(queryset=LectureHall.objects.all())
     price = serializers.DecimalField(max_digits=10, decimal_places=2, read_only=True)

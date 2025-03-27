@@ -4,6 +4,7 @@ from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
+from user.api.permissions import IsAdmin, IsFaculty, IsStudent 
 from django.core.mail import send_mail
 from rest_framework.permissions import AllowAny
 from django.shortcuts import get_object_or_404
@@ -29,7 +30,7 @@ from io import BytesIO
 
 
 @api_view(['GET'])
-@permission_classes([AllowAny])
+@permission_classes([IsAuthenticated])
 def get_pricing(request):
     lecture_hall_id = request.GET.get("lecture_hall")
     if not lecture_hall_id:
@@ -102,9 +103,8 @@ def is_at_least_2_days_advance(booking_date):
     return (booking_date - date.today()).days >= 2
 
 class DeleteBookingAPIView(APIView):
-    """
-    API view to handle the deletion of a booking.
-    """
+    
+    permission_classes = [IsAdmin]
     def delete(self, request, booking_id):
         try:
             # Retrieve the booking by the provided booking_id
@@ -126,7 +126,7 @@ class DeleteBookingAPIView(APIView):
         
         
 class BookingCreateAPIView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     def post(self, request):
         data = request.data.copy()
@@ -226,10 +226,9 @@ class BookingCreateAPIView(APIView):
 
 
 class AvailableSlotsAPIView(APIView):
-    permission_classes = [AllowAny]  # Requires authentication
+    permission_classes = [IsAuthenticated]  # Requires authentication
 
     def get(self, request):
-        """Returns available slots for a selected hall and date."""
         hall_id = request.GET.get("lecture_hall")
         date_str = request.GET.get("date")
 
@@ -260,7 +259,6 @@ class ApproveBookingAPIView(APIView):
     permission_classes = [AllowAny]  
 
     def get(self, request):
-        """Approve a booking via GET request (clicking link in email)."""
         global_token = request.GET.get("global_token")
         authority_token = request.GET.get("authority_token")
         
@@ -346,7 +344,7 @@ class RejectBookingAPIView(APIView):
         return HttpResponse("Booking rejected successfully!")
 
 class PendingApprovalsAPIView(APIView):
-    permission_classes = [AllowAny]  
+    permission_classes = [IsAuthenticated]  
 
     def post(self, request):
         # Extract user ID from request body
@@ -364,7 +362,7 @@ class PendingApprovalsAPIView(APIView):
 
 class BookingHistoryAPIView(generics.ListAPIView):
 
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     def post(self, request):
 
@@ -382,7 +380,7 @@ class BookingHistoryAPIView(generics.ListAPIView):
 
 
 class GenerateBillAPIView(APIView):
-    permission_classes = [AllowAny]  # Ensure only authenticated users can access
+    permission_classes = [IsAuthenticated]  # Ensure only authenticated users can access
 
     def get(self, request, booking_id):
         """Generate and return a booking bill as a PDF."""

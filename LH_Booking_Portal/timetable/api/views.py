@@ -3,6 +3,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from user.api.permissions import IsAdmin, IsFaculty, IsStudent 
 from rest_framework.permissions import AllowAny
 from rest_framework.decorators import api_view, permission_classes
 from timetable.models import LectureHall, TimeSlot, FixedLecture
@@ -15,10 +16,11 @@ logger = logging.getLogger(__name__)
 @api_view(["GET"])
 @permission_classes([AllowAny])
 def LectureHallAPIView(request):
-    """API View to get all lecture halls"""
+
     lecture_halls = LectureHall.objects.all()
     serializer = LectureHallSerializer(lecture_halls, many=True)
     return Response(serializer.data)
+
 
 class TimetableAPIView(APIView):
     permission_classes = [AllowAny]
@@ -111,7 +113,7 @@ class TimetableAPIView(APIView):
 
 
 class AllBookingsAPIView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAdmin]
 
     def get(self, request, hall_id):
         hall = get_object_or_404(LectureHall, id=hall_id)

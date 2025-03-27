@@ -1,69 +1,42 @@
 import React, { useEffect, useState } from "react";
 import Header from "../Basic/Header";
 import UserNavbar from "../Basic/UserNavbar"
+import { fetchBookingHistory } from "../../api";
+import { downloadBill } from "../../api";
 
 const BookingHistoryList = () => {
     const [bookings, setBookings] = useState([]);
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        const fetchBookingHistory = async () => {
-            const token = localStorage.getItem("authToken");
-            const userId = localStorage.getItem("userId");
-
-            if (!token || !userId) {
-                alert("User not authenticated. Please log in.");
-                return;
-            }
-
+        const fetchHistory = async () => {
             try {
-                const response = await fetch("http://127.0.0.1:8000/api/bookings/history/", {
-                    method: "POST",
-                    headers: {
-                        "Authorization": `Bearer ${token}`,
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({ user: userId }),
-                });
-
-                if (!response.ok) {
-                    throw new Error(`Error: ${response.status}`);
-                }
-
-                const data = await response.json();
+                const data = await fetchBookingHistory();
                 setBookings(data);
             } catch (error) {
-                console.error("Failed to fetch bookings:", error);
-                setError("Failed to fetch bookings.");
+                setError(error.error || "Failed to fetch bookings.");
             }
         };
-        fetchBookingHistory();
+    
+        fetchHistory();
+    
     }, []);
 
     const handleDownload = async (bookingId) => {
         try {
-            const response = await fetch(`/api/generate-bill/${bookingId}/`, {
-                method: "GET",
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-                },
-            });
-
-            if (!response.ok) {
-                throw new Error("Failed to download bill");
-            }
-
-            const blob = await response.blob();
+            const blob = await downloadBill(bookingId); // Get the blob from API
             const url = window.URL.createObjectURL(blob);
+            
             const a = document.createElement("a");
             a.href = url;
             a.download = `LHC_Bill_${bookingId}.pdf`;
             document.body.appendChild(a);
             a.click();
+    
             window.URL.revokeObjectURL(url);
         } catch (error) {
-            console.error("Error downloading bill:", error);
-            alert("Failed to download bill. Please try again.");
+            console.error(error);
+            alert(error.message);
         }
     };
 

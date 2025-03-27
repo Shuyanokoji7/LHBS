@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { registerUser } from "../../api";
-import axios from "axios";
+import { addNewAuthority } from "../../api";
 import Header from "../Basic/Header";
 import UserNavbar from "../Basic/UserNavbar"
 import "./register.css"
+import axiosInstance from "../../api";
 
 const Register = () => {
     const [formData, setFormData] = useState({
@@ -21,10 +22,17 @@ const Register = () => {
     const [error, setError] = useState("");
 
     useEffect(() => {
-        axios.get("http://127.0.0.1:8000/api/user/authorities/")
-            .then(response => setAvailableAuthorities(response.data))
-            .catch(error => console.error("Error fetching authorities:", error));
-    }, []);
+        const fetchAuthorities = async () => {
+            try {
+                const response = await axiosInstance.get("/user/authorities/");
+                setAvailableAuthorities(response.data);
+            } catch (error) {
+                console.error("Error fetching authorities:", error);
+            }
+        };
+
+        fetchAuthorities(); // Call the async function
+    }, []); 
 
     // Extract names from fetched data
     const items = availableAuthorities.map(auth => auth.name);
@@ -63,19 +71,17 @@ const Register = () => {
             alert("Both name and email are required!");
             return;
         }
-    
         try {
-            const response = await axios.post("http://127.0.0.1:8000/api/user/createauthorities/", newAuthority);
-            const createdAuthority = response.data;
+            const createdAuthority = await addNewAuthority(newAuthority);
             
             setAvailableAuthorities([...availableAuthorities, createdAuthority]);
             setSelectedAuthorities([...selectedAuthorities, createdAuthority]);
             setNewAuthority({ name: "", email: "" });
     
             alert("Authority added successfully!");
-        } catch (err) {
-            console.error("Error adding authority:", err);
-            alert("Failed to add authority.");
+        } catch (error) {
+            console.error("Error adding authority:", error);
+            alert(error.error || "Failed to add authority.");
         }
     };
     
