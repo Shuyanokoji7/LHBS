@@ -1,0 +1,107 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+h2 {
+    text-align: center;
+    color: #333;
+}
+
+form {
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    width: 350px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+input, select, button {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+button {
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+    border: none;
+    transition: background 0.3s;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+h4 {
+    margin-top: 10px;
+    color: #444;
+}
+
+/* Styling for selected authorities */
+.selected-authorities {
+    min-height: 40px;
+    padding: 5px;
+    border: 1px solid #ccc;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    background: #f9f9f9;
+    border-radius: 5px;
+}
+
+.selected-authority {
+    background: #ddd;
+    padding: 5px;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+}
+
+.selected-authority button {
+    margin-left: 5px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    color: red;
+    font-size: 14px;
+}
+
+/* Dropdown Styling */
+.dropdown {
+    max-height: 150px;
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    position: absolute;
+    width: 100%;
+    background: white;
+    z-index: 1000;
+    border-radius: 5px;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.dropdown div {
+    padding: 10px;
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+}
+
+.dropdown div:hover {
+    background: #f1f1f1;
+}
+
+.no-results {
+    padding: 10px;
+    color: #666;
+    text-align: center;
+}

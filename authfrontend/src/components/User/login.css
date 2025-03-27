@@ -1,0 +1,224 @@
+:root {
+    --primary-color: #3a7bd5;
+    --secondary-color: #00d2ff;
+    --text-color: #333;
+    --background-color: #f4f6f9;
+  }
+  
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  body,
+  html {
+    height: 100%;
+    font-family: "Inter", sans-serif;
+    background-color: var(--background-color);
+  }
+  
+  .login-container {
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  .campus-visual {
+    flex: 1.5;
+    position: relative;
+    background: linear-gradient(
+      135deg,
+      rgba(58, 123, 213, 0.7),
+      rgba(0, 210, 255, 0.7)
+    );
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+  
+  .campus-visual img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.7;
+  }
+  
+  .campus-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      135deg,
+      rgba(58, 123, 213, 0.6),
+      rgba(0, 210, 255, 0.6)
+    );
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    text-align: center;
+    padding: 2rem;
+  }
+  
+  .campus-overlay h1 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    font-weight: 600;
+  }
+  
+  .campus-overlay p {
+    font-size: 1.1rem;
+    max-width: 500px;
+    line-height: 1.6;
+  }
+  
+  .login-form {
+    flex: 1;
+    background-color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 3rem;
+    position: relative;
+  }
+  
+  .logo-container {
+    position: absolute;
+    top: 2rem;
+    left: 3rem;
+    display: flex;
+    align-items: center;
+  }
+  
+  .logo {
+    width: 60px;
+    height: 60px;
+    margin-right: 1rem;
+  }
+  
+  .logo-text {
+    color: var(--text-color);
+    font-size: 1.2rem;
+    font-weight: 600;
+  }
+  
+  .form-content {
+    max-width: 350px;
+    width: 100%;
+    margin: 0 auto;
+  }
+  
+  .form-header {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+  
+  .form-header h2 {
+    color: var(--primary-color);
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .form-header p {
+    color: #6c757d;
+  }
+  
+  .input-group {
+    margin-bottom: 1.5rem;
+  }
+  
+  .input-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--text-color);
+    font-weight: 500;
+  }
+  
+  .input-wrapper {
+    position: relative;
+  }
+  
+  .input-wrapper input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+  }
+  
+  .input-wrapper input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(58, 123, 213, 0.1);
+  }
+  
+  .input-icon {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6c757d;
+  }
+  
+  .login-button {
+    width: 100%;
+    padding: 0.875rem;
+    background: linear-gradient(
+      to right,
+      var(--primary-color),
+      var(--secondary-color)
+    );
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+  }
+  
+  .login-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 6px rgba(58, 123, 213, 0.2);
+  }
+  
+  .forgot-password {
+    text-align: center;
+    margin-top: 1rem;
+  }
+  
+  .forgot-password a {
+    color: var(--primary-color);
+    text-decoration: none;
+    transition: color 0.3s ease;
+  }
+  
+  .forgot-password a:hover {
+    color: var(--secondary-color);
+  }
+  
+  @media (max-width: 768px) {
+    .login-container {
+      flex-direction: column;
+    }
+  
+    .campus-visual {
+      display: none;
+    }
+  
+    .login-form {
+      width: 100%;
+      padding: 2rem;
+    }
+  }
+  
+  /* Add Google Fonts import */
+  @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap");
+  

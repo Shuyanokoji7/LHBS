@@ -1,0 +1,49 @@
+
+.user-navbar {
+  width: 200px;
+  background-color: #EFF6FF; /* blue-50 */
+  padding: 16px;
+  height: 100vh;
+  position: fixed; /* Fixes the navbar on the left side of the screen */
+  top: 60px; /* Adjust this value based on your header height */
+  left: 0; /* Aligns the navbar to the left */
+  z-index: 1000; /* Ensures the navbar stays above other content */
+}
+.nav-item {
+  width: 100%; /* Keeps the button width 100% of the navbar width */
+  border-radius: 9999px; /* Keeps the button rounded */
+  padding: 12px 24px; /* Increased padding for larger buttons */
+  margin-bottom: 12px;
+  text-align: center;
+  background-color: #DBEAFE; /* blue-100 */
+  color: #1E3A8A; /* blue-900 */
+  transition: background-color 0.2s, color 0.2s;
+  cursor: pointer;
+  border: none;
+  font-size: 16px; /* Increased font size */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-item:hover {
+  background-color: #BFDBFE; /* blue-200 */
+}
+
+.nav-item.active {
+  background-color: #3B82F6; /* blue-500 */
+  color: white;
+}
+
+.info-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px; /* Increased the icon size */
+  height: 20px; /* Increased the icon size */
+  margin-left: 8px; /* Adjusted margin for better spacing */
+  font-size: 14px; /* Increased icon font size */
+  color: white;
+  background-color: #2563EB; /* blue-600 */
+  border-radius: 50%;
+}
